@@ -110,3 +110,49 @@ model = ResNet(ResidualBlock, [2,2,2]).to(device)
 #%%
 from torchsummary import summary
 summary(model, (3, 32, 32))
+#%%
+loss_fn = nn.CrossEntropyLoss()
+optimizer = torch.optim.Adam(model.parameters(), lr = learning_rate)
+def update_lr(optimizer, lr):
+    for param_group in optimizer.param_groups:
+        param_group['lr'] = lr
+
+total_step = len(train_loader)
+curr_lr = learning_rate
+for epoch in range(num_epochs):
+    for i, (images, labels) in enumerate(train_loader):
+        images = images.to(device)
+        labels = labels.to(device)
+
+        outputs = model(images)
+        loss = loss_fn(outputs, labels)
+
+        optimizer.zero_grad()
+        loss.backward()
+        optimizer.step()
+        
+        if (i+1) % 100 == 0:
+            print("Epoch {}/{} Step {}/{} loss {:.4f}"\
+                    .format(epoch+1, num_epochs, i+1, total_step, loss.item()))
+        
+    if (epoch+1) % 20 == 0:
+        curr_lr /= 3.0
+        update_lr(optimizer, curr_lr)
+
+#%%
+model.eval()
+with torch.no_grad():
+    correct = 0
+    total = 0
+    for images, labels in test_loader:
+        images = images.to(device)
+        labels = labels.to(device)
+        outputs = model(images)
+        _, predicted = torch.max(outputs.data, 1)
+        total += labels.size(0)
+        correct += (predicted == labels).sum().item()
+
+    print('Accuracy : {:.2f}%'.format(100*correct/total))
+
+
+# torch.save(model.state_dict(), 'model.ckpt)
