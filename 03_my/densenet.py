@@ -67,4 +67,10 @@ class DenseNet(nn.Module):
         nin_block = growth_rate*2
         for i, n_l in enumerate(layer_sequence):
             dense_sequence.append(DenseBlock())
-
+#%%
+import torchvision
+from torchsummary import summary
+#%%
+model = torchvision.models.densenet121()
+model.cuda()
+summary(model, (3, 224, 224))
