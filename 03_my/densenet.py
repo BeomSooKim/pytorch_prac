@@ -88,14 +88,14 @@ class DenseNet(nn.Module):
         self.fc = nn.Linear(nin_block, 1000)
 
     def forward(self, x):
-        print(x.shape)
         out = self.init_conv(x)
         out = self.init_bn(out)
         out = self.relu(out)
         out = self.init_pool(out)
         out = self.blocks(out)
         out = self.avgpool(out)
-        out = out.view(-1)
+        out = out.view(2, -1)
+        #print(out.shape)
         out = self.fc(out)
 
         return out
@@ -103,7 +103,7 @@ class DenseNet(nn.Module):
 #%%
 mymodel= DenseNet(3, 32, [6, 12, 24, 16])
 mymodel.cuda()
-summary(mymodel, (3, 224, 224), batch_size = 4)
+summary(mymodel, (3, 224, 224), batch_size = 1)
 #%%
 nin_block = 64
 growth_rate = 32
