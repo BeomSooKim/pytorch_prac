@@ -81,21 +81,21 @@ class DenseNet(nn.Module):
             if i + 1 != self.n_blocks:
                 dense_sequence.append(TransitionLayer(inf = nin_block, outf = nin_block // 2, padding = 0, filter_size = 1, bias = False, stride = 1))
                 nin_block = nin_block // 2
-            print(nin_block)
+            #print(nin_block)
         
         self.blocks = nn.Sequential(*dense_sequence)
         self.avgpool = nn.AvgPool2d(kernel_size = 7)
         self.fc = nn.Linear(nin_block, 1000)
 
     def forward(self, x):
+        print(x.shape)
         out = self.init_conv(x)
         out = self.init_bn(out)
         out = self.relu(out)
         out = self.init_pool(out)
         out = self.blocks(out)
         out = self.avgpool(out)
-        out = out.view(2, -1)
-        #print(out.shape)
+        out = torch.flatten(out, 1)
         out = self.fc(out)
 
         return out
